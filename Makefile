@@ -412,7 +412,7 @@ ifeq ($(PLATFORM),pandora)
 
   OPTIMIZEVM = -O3 -funroll-loops -fomit-frame-pointer
   OPTIMIZE = $(OPTIMIZEVM) -ffast-math
-  HAVE_VM_COMPILED=
+  HAVE_VM_COMPILED = true
 
   ifneq ($(HAVE_VM_COMPILED),true)
     BASE_CFLAGS += -DNO_VM_COMPILED
@@ -1654,6 +1654,9 @@ ifeq ($(HAVE_VM_COMPILED),true)
   ifeq ($(ARCH),sparc)
     Q3OBJ += $(B)/client/vm_sparc.o
   endif
+  ifeq ($(ARCH),arm)
+    Q3OBJ += $(B)/client/vm_armv7l.o
+  endif
 endif
 
 ifeq ($(PLATFORM),mingw32)
@@ -1826,6 +1829,9 @@ ifeq ($(HAVE_VM_COMPILED),true)
   endif
   ifeq ($(ARCH),sparc)
     Q3DOBJ += $(B)/ded/vm_sparc.o
+  endif
+  ifeq ($(ARCH),arm)
+    Q3DOBJ += $(B)/client/vm_armv7l.o
   endif
 endif
 
