@@ -333,7 +333,7 @@ void OpenCfg ( const char* file )
 
     /* Set defaults */
 #if defined(USE_EGL_SDL)
-    eglSettings[CFG_MODE]           = RENDER_SDL;
+    eglSettings[CFG_MODE]           = RENDER_RAW; //RENDER_SDL;
 #else
     eglSettings[CFG_MODE]           = RENDER_RAW;
 #endif
