@@ -48,9 +48,20 @@ SDL_SysWMinfo sysWmInfo;      /** Holds our X Display/Window information */
 #endif
 int fbdev = -1;
 
+#elif defined(ODROID)
+#define USE_SRGB 1
 #elif defined(RPI)
 #include "bcm_host.h"
 #endif /* PANDORA */
+
+#ifdef USE_SRGB
+#ifndef EGL_GL_COLORSPACE_KHR
+#define EGL_GL_COLORSPACE_KHR                   0x309D
+#define EGL_GL_COLORSPACE_SRGB_KHR              0x3089
+#define EGL_GL_COLORSPACE_LINEAR_KHR            0x308A
+#endif
+static int use_srgb = 1;
+#endif
 
 enum EGL_RENDER_T {
     RENDER_RAW=0,           /** Sets render mode to raw or framebuffer mode. */
@@ -254,6 +265,25 @@ int8_t EGL_Open( uint16_t width, uint16_t height )
     }
 #endif /* EGL_VERSION_1_2 */
 
+#if defined(USE_SRGB)
+    if (use_srgb==1)
+    {
+	if(strstr(eglQueryString(eglDisplay, EGL_EXTENSIONS), "EGL_KHR_gl_colorspace"))
+	{
+	    printf("EGLport: sRGB surface supported\n");
+	    use_srgb=2;
+	}
+	else
+	{
+            printf("EGLport: sRGB surface not supported, disabling\n");
+            use_srgb=0;
+	}
+    }
+    EGLint const sRGB[] = {EGL_GL_COLORSPACE_KHR, EGL_GL_COLORSPACE_SRGB_KHR, EGL_NONE};
+#else
+    EGLint const *sRGB = NULL;
+#endif
+
     printf( "EGLport: Creating Context\n" );
     eglContext = peglCreateContext( eglDisplay, eglConfigs[configIndex], NULL, contextAttribs );
     if (eglContext == EGL_NO_CONTEXT)
@@ -270,7 +300,7 @@ int8_t EGL_Open( uint16_t width, uint16_t height )
         return 1;
     }
 
-    eglSurface = peglCreateWindowSurface( eglDisplay, eglConfigs[configIndex], nativeWindow, 0 );
+    eglSurface = peglCreateWindowSurface( eglDisplay, eglConfigs[configIndex], nativeWindow, sRGB );
     if (eglSurface == EGL_NO_SURFACE)
     {
         CheckEGLErrors( __FILE__, __LINE__ );
@@ -344,13 +374,19 @@ void OpenCfg ( const char* file )
     eglSettings[CFG_VSYNC]          = 0;
     eglSettings[CFG_FSAA]           = 0;
     eglSettings[CFG_FPS]            = 0;
+#ifdef PANDORA
     eglSettings[CFG_RED_SIZE]       = 5;
     eglSettings[CFG_GREEN_SIZE]     = 6;
     eglSettings[CFG_BLUE_SIZE]      = 5;
+#else
+    eglSettings[CFG_RED_SIZE]       = 8;
+    eglSettings[CFG_GREEN_SIZE]     = 8;
+    eglSettings[CFG_BLUE_SIZE]      = 8;
+#endif
     eglSettings[CFG_ALPHA_SIZE]     = 0;
     eglSettings[CFG_DEPTH_SIZE]     = 16;
     eglSettings[CFG_BUFFER_SIZE]    = 16;
-    eglSettings[CFG_STENCIL_SIZE]   = 0;
+    eglSettings[CFG_STENCIL_SIZE]   = 8;
 
     /* Parse INI file */
     fp = fopen( file, "r");
