@@ -333,7 +333,11 @@ void OpenCfg ( const char* file )
 
     /* Set defaults */
 #if defined(USE_EGL_SDL)
-    eglSettings[CFG_MODE]           = RENDER_RAW; //RENDER_SDL;
+#ifdef PANDORA
+    eglSettings[CFG_MODE]           = RENDER_RAW;
+#else
+    eglSettings[CFG_MODE]           = RENDER_SDL;
+#endif
 #else
     eglSettings[CFG_MODE]           = RENDER_RAW;
 #endif

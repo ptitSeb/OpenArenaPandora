@@ -15,6 +15,7 @@ This version is aimed at OpenPandra, so get:
  * GLES renderer (using -DHAVE_GLES)
  * Toggle Crouch function (using -DCROUCH), disabled by default and with a new option in cfg
  * OpenPandora support of course (using -DPANDORA), for screen resolution mainly.
+ * ODROID support (build with make ODROID=1), mostly like Pandora, but without the control and resolution hack
 
 There are some hard-coded value in the Makefile, located at the beggining to force "OpenPandora version" (COMPILE_PLATFORM=pandora and COMPILE_ARCH=arm).
  

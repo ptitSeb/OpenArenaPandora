@@ -385,9 +385,15 @@ else # ifeq Linux
 
 ifeq ($(PLATFORM),pandora)
 
+ ifeq ($(ODROID),1)
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
+    -pipe -DUSE_ICON -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard -fsigned-char \
+    -ftree-vectorize -fsingle-precision-constant
+ else
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
     -pipe -DUSE_ICON -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp -fsigned-char \
     -ftree-vectorize -fsingle-precision-constant
+ endif
   CLIENT_CFLAGS = $(SDL_CFLAGS)
   SERVER_CFLAGS =
   USE_LOCAL_HEADERS = 
@@ -425,7 +431,11 @@ ifeq ($(PLATFORM),pandora)
   THREAD_LIBS=-lpthread
   LIBS=-ldl -lm
 
+ ifeq ($(ODROID),1)
+  CLIENT_LIBS=$(SDL_LIBS) -lGLESv1_CM -lEGL
+ else
   CLIENT_LIBS=$(SDL_LIBS) -lGLES_CM -lEGL
+ endif
 
   ifeq ($(USE_OPENAL),1)
     ifneq ($(USE_OPENAL_DLOPEN),1)
@@ -456,7 +466,11 @@ ifeq ($(PLATFORM),pandora)
     CLIENT_CFLAGS += -I$(SDLHDIR)/include
   endif
   
+ ifeq ($(ODROID),1)
+  BASE_CFLAGS += -DODROID -DARM -DNEON -DHAVE_GLES
+ else
   BASE_CFLAGS += -DPANDORA -DARM -DNEON -DHAVE_GLES
+ endif
 
 else # ifeq pandora
 #############################################################################
