@@ -390,9 +390,15 @@ ifeq ($(PLATFORM),pandora)
     -pipe -DUSE_ICON -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard -fsigned-char \
     -ftree-vectorize -fsingle-precision-constant
  else
-  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
+  ifeq ($(RPI),1)
+   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
+    -pipe -DUSE_ICON -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard -fsigned-char \
+    -ftree-vectorize -fsingle-precision-constant -I/opt/vc/include
+  else
+   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
     -pipe -DUSE_ICON -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp -fsigned-char \
     -ftree-vectorize -fsingle-precision-constant
+  endif
  endif
   CLIENT_CFLAGS = $(SDL_CFLAGS)
   SERVER_CFLAGS =
@@ -434,7 +440,11 @@ ifeq ($(PLATFORM),pandora)
  ifeq ($(ODROID),1)
   CLIENT_LIBS=$(SDL_LIBS) -lGLESv1_CM -lEGL
  else
-  CLIENT_LIBS=$(SDL_LIBS) -lGLES_CM -lEGL
+  ifeq ($(RPI),1)
+   CLIENT_LIBS=$(SDL_LIBS) -L/opt/vc/lib -lGLESv1_CM -lEGL
+  else
+   CLIENT_LIBS=$(SDL_LIBS) -lGLES_CM -lEGL
+  endif
  endif
 
   ifeq ($(USE_OPENAL),1)
@@ -469,7 +479,11 @@ ifeq ($(PLATFORM),pandora)
  ifeq ($(ODROID),1)
   BASE_CFLAGS += -DODROID -DARM -DNEON -DHAVE_GLES
  else
-  BASE_CFLAGS += -DPANDORA -DARM -DNEON -DHAVE_GLES
+  ifeq ($(ODROID),1)
+   BASE_CFLAGS += -DRPI -DARM -DNEON -DHAVE_GLES
+  else
+   BASE_CFLAGS += -DPANDORA -DARM -DNEON -DHAVE_GLES
+  endif
  endif
 
 else # ifeq pandora
