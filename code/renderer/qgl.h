@@ -58,7 +58,6 @@ extern void (APIENTRYP qglLockArraysEXT) (GLint first, GLsizei count);
 extern void (APIENTRYP qglUnlockArraysEXT) (void);
 
 #ifdef HAVE_GLES
-#ifdef HAVE_GLES
 #define GLdouble	GLfloat
 extern void myglClear(GLbitfield mask);
 extern void myglTexImage2D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
@@ -537,5 +536,4 @@ extern GLvoid (APIENTRYP qglGetVertexAttribPointervARB) (GLuint index, GLenum pn
 #define qglVertexPointer glVertexPointer
 #define qglViewport glViewport
 
-#endif
 #endif
