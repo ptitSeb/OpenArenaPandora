@@ -195,6 +195,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ARCH_STRING "mips"
 #elif defined __sh__
 #define ARCH_STRING "sh"
+#elif defined __riscv
+#define ARCH_STRING "rv64"
 #endif
 
 #if __FLOAT_WORD_ORDER == __BIG_ENDIAN

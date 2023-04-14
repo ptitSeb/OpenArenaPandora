@@ -8,8 +8,22 @@ COMPILE_PLATFORM=$(shell uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]'|sed -e 
 
 COMPILE_ARCH=$(shell uname -m | sed -e s/i.86/i386/)
 
-COMPILE_PLATFORM=pandora
-COMPILE_ARCH=arm
+ifeq ($(PANDORA),1)
+  COMPILE_PLATFORM=pandora
+  COMPILE_ARCH=arm
+endif
+ifeq ($(ODROID),1)
+  COMPILE_PLATFORM=pandora
+  COMPILE_ARCH=arm
+endif
+ifeq ($(RPI),1)
+  COMPILE_PLATFORM=pandora
+  COMPILE_ARCH=arm
+endif
+ifeq ($(RV64),1)
+  COMPILE_PLATFORM=rv64
+  COMPILE_ARCH=rv64
+endif
 
 ifeq ($(COMPILE_PLATFORM),sunos)
   # Solaris uname and GNU uname differ
@@ -488,6 +502,78 @@ ifeq ($(PLATFORM),pandora)
 
 else # ifeq pandora
 #############################################################################
+# SETUP AND BUILD -- RV64
+#############################################################################
+
+ifeq ($(PLATFORM),rv64)
+
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
+    -pipe -fsigned-char -march=rv64gc -mabi=lp64d
+
+  CLIENT_CFLAGS = $(SDL_CFLAGS)
+  SERVER_CFLAGS =
+  USE_LOCAL_HEADERS = 
+  
+  ifeq ($(USE_OPENAL),1)
+    CLIENT_CFLAGS += -DUSE_OPENAL
+    ifeq ($(USE_OPENAL_DLOPEN),1)
+      CLIENT_CFLAGS += -DUSE_OPENAL_DLOPEN
+    endif
+  endif
+
+  ifeq ($(USE_CURL),1)
+    CLIENT_CFLAGS += -DUSE_CURL
+    ifeq ($(USE_CURL_DLOPEN),1)
+      CLIENT_CFLAGS += -DUSE_CURL_DLOPEN
+    endif
+  endif
+
+  ifeq ($(USE_CODEC_VORBIS),1)
+    CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
+  endif
+
+  OPTIMIZEVM = -O3 -funroll-loops -fomit-frame-pointer
+  OPTIMIZE = $(OPTIMIZEVM) -ffast-math
+
+  ifneq ($(HAVE_VM_COMPILED),true)
+    BASE_CFLAGS += -DNO_VM_COMPILED
+  endif
+
+  SHLIBEXT=so
+  SHLIBCFLAGS=-fPIC -fvisibility=hidden
+  SHLIBLDFLAGS=-shared $(LDFLAGS)
+
+  THREAD_LIBS=-lpthread
+  LIBS=-ldl -lm
+
+  CLIENT_LIBS=$(SDL_LIBS) -lGL
+
+  ifeq ($(USE_OPENAL),1)
+    ifneq ($(USE_OPENAL_DLOPEN),1)
+      CLIENT_LIBS += -lopenal
+    endif
+  endif
+
+  ifeq ($(USE_CURL),1)
+    ifneq ($(USE_CURL_DLOPEN),1)
+      CLIENT_LIBS += -lcurl
+    endif
+  endif
+
+  ifeq ($(USE_CODEC_VORBIS),1)
+    CLIENT_LIBS += -lvorbisfile -lvorbis -logg
+  endif
+
+  ifeq ($(USE_MUMBLE),1)
+    CLIENT_LIBS += -lrt
+  endif
+
+  ifeq ($(USE_LOCAL_HEADERS),1)
+    CLIENT_CFLAGS += -I$(SDLHDIR)/include
+  endif
+  
+else # ifeq rv64
+#############################################################################
 # SETUP AND BUILD -- MAC OS X
 #############################################################################
 
@@ -944,6 +1030,7 @@ else # ifeq sunos
 
 endif #Linux
 endif #pandora
+endif #rv64
 endif #darwin
 endif #mingw32
 endif #FreeBSD
