@@ -24,6 +24,10 @@ ifeq ($(RV64),1)
   COMPILE_PLATFORM=rv64
   COMPILE_ARCH=rv64
 endif
+ifeq ($(LA64),1)
+  COMPILE_PLATFORM=la64
+  COMPILE_ARCH=la64
+endif
 
 ifeq ($(COMPILE_PLATFORM),sunos)
   # Solaris uname and GNU uname differ
@@ -41,7 +45,7 @@ ifeq ($(COMPILE_PLATFORM),mingw32)
 endif
 
 ifndef BUILD_STANDALONE
-  BUILD_STANDALONE = 
+  BUILD_STANDALONE =
 endif
 ifndef BUILD_CLIENT
   BUILD_CLIENT     =
@@ -416,8 +420,8 @@ ifeq ($(PLATFORM),pandora)
  endif
   CLIENT_CFLAGS = $(SDL_CFLAGS)
   SERVER_CFLAGS =
-  USE_LOCAL_HEADERS = 
-  
+  USE_LOCAL_HEADERS =
+
   ifeq ($(USE_OPENAL),1)
     CLIENT_CFLAGS += -DUSE_OPENAL
     ifeq ($(USE_OPENAL_DLOPEN),1)
@@ -489,7 +493,7 @@ ifeq ($(PLATFORM),pandora)
   ifeq ($(USE_LOCAL_HEADERS),1)
     CLIENT_CFLAGS += -I$(SDLHDIR)/include
   endif
-  
+
  ifeq ($(ODROID),1)
   BASE_CFLAGS += -DODROID -DARM -DNEON -DHAVE_GLES
  else
@@ -512,8 +516,8 @@ ifeq ($(PLATFORM),rv64)
 
   CLIENT_CFLAGS = $(SDL_CFLAGS)
   SERVER_CFLAGS =
-  USE_LOCAL_HEADERS = 
-  
+  USE_LOCAL_HEADERS =
+
   ifeq ($(USE_OPENAL),1)
     CLIENT_CFLAGS += -DUSE_OPENAL
     ifeq ($(USE_OPENAL_DLOPEN),1)
@@ -571,8 +575,80 @@ ifeq ($(PLATFORM),rv64)
   ifeq ($(USE_LOCAL_HEADERS),1)
     CLIENT_CFLAGS += -I$(SDLHDIR)/include
   endif
-  
-else # ifeq rv64
+
+else # ifeq la64
+#############################################################################
+# SETUP AND BUILD -- LA64
+#############################################################################
+
+ifeq ($(PLATFORM),la64)
+
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
+    -pipe -fsigned-char -march=loongarch64 -mabi=lp64d
+
+  CLIENT_CFLAGS = $(SDL_CFLAGS)
+  SERVER_CFLAGS =
+  USE_LOCAL_HEADERS =
+
+  ifeq ($(USE_OPENAL),1)
+    CLIENT_CFLAGS += -DUSE_OPENAL
+    ifeq ($(USE_OPENAL_DLOPEN),1)
+      CLIENT_CFLAGS += -DUSE_OPENAL_DLOPEN
+    endif
+  endif
+
+  ifeq ($(USE_CURL),1)
+    CLIENT_CFLAGS += -DUSE_CURL
+    ifeq ($(USE_CURL_DLOPEN),1)
+      CLIENT_CFLAGS += -DUSE_CURL_DLOPEN
+    endif
+  endif
+
+  ifeq ($(USE_CODEC_VORBIS),1)
+    CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
+  endif
+
+  OPTIMIZEVM = -O3 -funroll-loops -fomit-frame-pointer
+  OPTIMIZE = $(OPTIMIZEVM) -ffast-math
+
+  ifneq ($(HAVE_VM_COMPILED),true)
+    BASE_CFLAGS += -DNO_VM_COMPILED
+  endif
+
+  SHLIBEXT=so
+  SHLIBCFLAGS=-fPIC -fvisibility=hidden
+  SHLIBLDFLAGS=-shared $(LDFLAGS)
+
+  THREAD_LIBS=-lpthread
+  LIBS=-ldl -lm
+
+  CLIENT_LIBS=$(SDL_LIBS) -lGL
+
+  ifeq ($(USE_OPENAL),1)
+    ifneq ($(USE_OPENAL_DLOPEN),1)
+      CLIENT_LIBS += -lopenal
+    endif
+  endif
+
+  ifeq ($(USE_CURL),1)
+    ifneq ($(USE_CURL_DLOPEN),1)
+      CLIENT_LIBS += -lcurl
+    endif
+  endif
+
+  ifeq ($(USE_CODEC_VORBIS),1)
+    CLIENT_LIBS += -lvorbisfile -lvorbis -logg
+  endif
+
+  ifeq ($(USE_MUMBLE),1)
+    CLIENT_LIBS += -lrt
+  endif
+
+  ifeq ($(USE_LOCAL_HEADERS),1)
+    CLIENT_CFLAGS += -I$(SDLHDIR)/include
+  endif
+
+else # ifeq la64
 #############################################################################
 # SETUP AND BUILD -- MAC OS X
 #############################################################################
@@ -582,9 +658,9 @@ ifeq ($(PLATFORM),darwin)
   LIBS = -framework Cocoa
   CLIENT_LIBS=
   OPTIMIZEVM=
-  
+
   BASE_CFLAGS = -Wall -Wimplicit -Wstrict-prototypes
-  CLIENT_CFLAGS = 
+  CLIENT_CFLAGS =
   SERVER_CFLAGS =
 
   ifeq ($(ARCH),ppc)
@@ -772,7 +848,7 @@ ifeq ($(PLATFORM),freebsd)
     -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
     -DUSE_ICON -DMAP_ANONYMOUS=MAP_ANON
   CLIENT_CFLAGS = $(SDL_CFLAGS)
-  SERVER_CFLAGS = 
+  SERVER_CFLAGS =
   HAVE_VM_COMPILED = true
 
   OPTIMIZEVM = -O3 -funroll-loops -fomit-frame-pointer
@@ -841,7 +917,7 @@ ifeq ($(PLATFORM),openbsd)
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
     -DUSE_ICON
   CLIENT_CFLAGS = $(SDL_CFLAGS)
-  SERVER_CFLAGS = 
+  SERVER_CFLAGS =
 
   ifeq ($(USE_OPENAL),1)
     CLIENT_CFLAGS += -DUSE_OPENAL
@@ -888,7 +964,7 @@ ifeq ($(PLATFORM),openbsd)
     endif
   endif
 
-  ifeq ($(USE_CURL),1) 
+  ifeq ($(USE_CURL),1)
     ifneq ($(USE_CURL_DLOPEN),1)
       CLIENT_LIBS += -lcurl
     endif
@@ -940,7 +1016,7 @@ ifeq ($(PLATFORM),irix64)
     -I. -I$(ROOT)/usr/include -DNO_VM_COMPILED
   CLIENT_CFLAGS = $(SDL_CFLAGS)
   OPTIMIZE = -O3
-  
+
   SHLIBEXT=so
   SHLIBCFLAGS=
   SHLIBLDFLAGS=-shared
@@ -998,7 +1074,7 @@ ifeq ($(PLATFORM),sunos)
     CLIENT_LDFLAGS += -L/usr/X11/lib/NVIDIA -R/usr/X11/lib/NVIDIA
   endif
   endif
-  
+
   OPTIMIZE = $(OPTIMIZEVM) -ffast-math
 
   ifneq ($(HAVE_VM_COMPILED),true)
@@ -1031,6 +1107,7 @@ else # ifeq sunos
 endif #Linux
 endif #pandora
 endif #rv64
+endif #la64
 endif #darwin
 endif #mingw32
 endif #FreeBSD
@@ -1795,7 +1872,7 @@ endif
 
 Q3POBJ += \
   $(B)/client/sdl_glimp.o
-  
+
 ifeq ($(ARCH),arm)
 Q3POBJ += \
   $(B)/client/eglport.o
