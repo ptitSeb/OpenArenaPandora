@@ -88,7 +88,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ID_INLINE inline
 #define PATH_SEP '\\'
 
-#if defined( __WIN64__ ) 
+#if defined( __WIN64__ )
 #define ARCH_STRING "x86_64"
 #elif defined _M_ALPHA
 #define ARCH_STRING "AXP"
@@ -197,6 +197,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ARCH_STRING "sh"
 #elif defined __riscv
 #define ARCH_STRING "rv64"
+#elif defined __loongarch64
+#define ARCH_STRING "la64"
 #endif
 
 #if __FLOAT_WORD_ORDER == __BIG_ENDIAN

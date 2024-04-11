@@ -3,7 +3,7 @@ OpenArenaPandora
 
 OpenArena version for OpenPandora / ODroid / RPi, featuring ARM support and GLES renderer.
 
-The current state is playable without any major problems and good performances. 
+The current state is playable without any major problems and good performances.
 Only limits are len flares that requires depth buffer reading and so are disabled.
 Note that this version integrate a QVM with a JIT backend on ARM, so bots doesn't slow down the games too much.
 
@@ -19,6 +19,7 @@ This version is aimed at OpenPandra, so get:
  * ODROID support (build with `make ODROID=1`), mostly like Pandora, but without the control and resolution hack
  * RPI support (build with `make RPI=1`), same as ODROID (will not work for RPI 1, has NEON support is compiled in)
  * RISC-V 64 support (build with `make RV64=1`) will build an OpenGL version without compiled VM
+ * LoongArch 64 support (build with `make LA64=1`) will build an OpenGL version without compiled VM
 
 Note that RPI build is untested, any feed back is welcome.
 
